@@ -1,8 +1,7 @@
 package com.proyectogradle.bakend.entities;
 
 import jakarta.persistence.*;
-
-import java.awt.*;
+import org.locationtech.jts.geom.Point;
 import java.time.LocalDateTime;
 
 @Entity
@@ -11,7 +10,7 @@ public class Usuario {
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+        private Integer id;
 
         @Column(unique = true, nullable = false, length = 100)
         private String username;
@@ -19,6 +18,7 @@ public class Usuario {
         @Column(name = "password_hash", nullable = false)
         private String passwordHash;
 
+        // Hibernate Spatial necesita saber explícitamente que es una geografía de PostGIS
         @Column(columnDefinition = "geography(Point, 4326)", nullable = false)
         private Point ubicacion;
 
@@ -28,11 +28,10 @@ public class Usuario {
 
         // Getters y Setters
 
-        public Long getId() {
+        public Integer getId() {
                 return id;
         }
-
-        public void setId(Long id) {
+        public void setId(Integer id) {
                 this.id = id;
         }
 

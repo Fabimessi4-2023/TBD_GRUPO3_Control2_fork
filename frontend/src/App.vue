@@ -1,5 +1,6 @@
 <template>
-  <MainLayout />
+  <router-view v-if="['/login', '/register'].includes($route.path)" />
+  <MainLayout v-else />
 </template>
 
 <script>
