@@ -1,6 +1,7 @@
 package com.proyectogradle.bakend.security;
 
 import com.proyectogradle.bakend.security.jwt.AuthEntryPointJwt;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
+import java.util.Arrays;
 import java.util.List;
 
 // Indica que esta clase es de configuración de Spring.
@@ -35,11 +37,16 @@ public class WebSecurityConfig {
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
 
+    @Value("${app.cors.allowed-origins}")
+    private String allowedOrigins;
+
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();
     }
-    // Configura el proveedor de autenticación usando el UserDetailsService y el encoder de contraseñas.
+
+    // Configura el proveedor de autenticación usando el UserDetailsService y el
+    // encoder de contraseñas.
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -52,11 +59,13 @@ public class WebSecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
+
     // Bean para codificar contraseñas usando BCrypt.
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     // Configuración principal de la cadena de filtros de seguridad.
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -65,22 +74,34 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**", "/api/agregaciondedatos/**", "/api/mediciones/**", "/api/puntos/correlacion","/api/resumensemanal/**"  ).permitAll()
-                                .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**", "/api/agregaciondedatos/**", "/api/mediciones/**",
+                                "/api/puntos/correlacion", "/api/resumensemanal/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-    // Bean para configurar CORS, permitiendo peticiones desde el frontend (por ejemplo, en localhost:3000).
+
+    // Bean para configurar CORS usando variable de entorno para los orígenes
+    // permitidos.
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8081"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowCredentials(true);
+
+        // Parsear los orígenes permitidos desde la variable de entorno (separados por
+        // coma)
+        config.setAllowedOrigins(
+                Arrays.stream(allowedOrigins.split(","))
+                        .map(String::trim)
+                        .toList());
+
+        config.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
         config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
