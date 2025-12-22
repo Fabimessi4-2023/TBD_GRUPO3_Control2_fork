@@ -27,7 +27,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class AuthController {
     @Autowired
     AuthenticationManager authenticationManager;
@@ -55,12 +54,11 @@ public class AuthController {
                     .body(new MensajeRespuesta("Error: Invalid username or password!"));
         }
 
-        // Autenticación con Spring Security (se usa el username y la password que llega en el request)
+        // Autenticación con Spring Security (se usa el username y la password que llega
+        // en el request)
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        username, loginRequest.getPassword()
-                )
-        );
+                        username, loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
@@ -92,8 +90,7 @@ public class AuthController {
 
         // IMPORTANTE: El orden es (Longitud, Latitud)
         Point puntoUbicacion = geometryFactory.createPoint(
-                new Coordinate(signUpRequest.getLongitud(), signUpRequest.getLatitud())
-        );
+                new Coordinate(signUpRequest.getLongitud(), signUpRequest.getLatitud()));
 
         // 3. Mapear datos a la Entidad
         Usuario usuario = new Usuario();

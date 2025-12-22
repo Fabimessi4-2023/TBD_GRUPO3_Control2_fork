@@ -22,7 +22,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/tareas")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class TareaController {
 
     private final TareaRepository tareaRepository;
@@ -144,7 +143,8 @@ public class TareaController {
         Point nuevaUbicacion = geometryFactory.createPoint(new Coordinate(request.getLongitud(), request.getLatitud()));
         tareaExistente.setUbicacion(nuevaUbicacion);
 
-        // 6. Guardar cambios (el método save del repository servirá si hace un UPDATE en SQL)
+        // 6. Guardar cambios (el método save del repository servirá si hace un UPDATE
+        // en SQL)
         tareaRepository.update(tareaExistente);
 
         return ResponseEntity.ok(new MensajeRespuesta("Tarea actualizada correctamente"));
@@ -178,17 +178,9 @@ public class TareaController {
         // El servicio se encarga de buscar el ID de ese usuario y filtrar sus tareas
         List<Tarea> tareas = tareaRepository.findByUsername(username);
 
-        // Retornamos 200 OK con la lista de tareas (estará vacía si el usuario no tiene)
+        // Retornamos 200 OK con la lista de tareas (estará vacía si el usuario no
+        // tiene)
         return ResponseEntity.ok(tareas);
     }
-
-
-
-
-
-
-
-
-
 
 }
