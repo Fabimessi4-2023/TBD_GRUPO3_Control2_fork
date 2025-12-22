@@ -37,16 +37,3 @@ CREATE TABLE tarea (
 CREATE INDEX idx_usuario_ubicacion ON usuario USING GIST (ubicacion);
 CREATE INDEX idx_sector_ubicacion ON sector USING GIST (ubicacion);
 CREATE INDEX idx_tarea_ubicacion ON tarea USING GIST (ubicacion);
-
--- 5. VISTAS ÚTILES PARA CONSULTAS
--- Tareas completadas por sector y usuario
-CREATE VIEW vista_tareas_por_sector AS
-SELECT 
-    u.username,
-    s.nombre AS sector,
-    COUNT(t.id) AS tareas_completadas
-FROM tarea t
-JOIN usuario u ON t.id_usuario = u.id
-JOIN sector s ON t.id_sector = s.id
-WHERE t.completada = TRUE
-GROUP BY u.username, s.nombre;
