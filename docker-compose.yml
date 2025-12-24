@@ -76,4 +76,5 @@ networks:
 
 volumes:
   postgres_data:
-    name: tbd-postgres-data
+    external: true
+    name: sistemagestiontareas-bd-xamjsl-data
