@@ -55,13 +55,6 @@ services:
       args:
         VUE_APP_API_URL: /api
     container_name: tbd-frontend
-    labels:
-      - "traefik.enable=true"
-      # Sustituye 1.2.3.4 por la IP real de tu servidor
-      - "traefik.http.routers.tbd-frontend.rule=Host(`161.35.238.238`)"
-      - "traefik.http.services.tbd-frontend.loadbalancer.server.port=80"
-      - "traefik.http.routers.tbd-frontend.entrypoints=web"
-      - "traefik.docker.network=dokploy-network"
     ports:
       - "${FRONTEND_PORT}:80"
     depends_on:
