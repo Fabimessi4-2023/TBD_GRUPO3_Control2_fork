@@ -1,6 +1,24 @@
 version: '3.8'
 
 services:
+  # PostgreSQL with PostGIS extension
+  database:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: sistemagestiontareas-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - tbd_postgres_prod_data:/var/lib/postgresql/data
+    networks:
+      - tbd-private-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   # Spring Boot Backend
   backend:
@@ -8,9 +26,12 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: tbd-backend
+    depends_on:
+      database:
+        condition: service_healthy
     environment:
       # Database connection - uses variables from application.properties
-      DB_URL: ${DB_URL}
+      DB_URL: jdbc:postgresql://database:5432/${POSTGRES_DB}
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
       # JWT Configuration
@@ -22,10 +43,9 @@ services:
       SPRING_JPA_SHOW_SQL: "false"
       SERVER_PORT: 8080
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
-    ports:
-      - "${BACKEND_PORT}:8080"
     networks:
-      - tbd-network
+      - tbd-private-net
+      - tbd-public-net
     restart: unless-stopped
 
   # Vue.js Frontend with Nginx
@@ -41,10 +61,17 @@ services:
     depends_on:
       - backend
     networks:
-      - tbd-network
+      - tbd-public-net
     restart: unless-stopped
 
 networks:
-  tbd-network:
+  # Red interna donde vive la DB (Sin salida a internet)
+  tbd-private-net:
+    internal: true
+  # Red para el tráfico web
+  tbd-public-net:
     driver: bridge
-    name: tbd-network
+
+volumes:
+  tbd_postgres_prod_data:
+    name: tbd_postgres_prod_data # Nombre fijo para evitar solapamientos en CI/CD
