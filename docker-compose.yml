@@ -61,6 +61,7 @@ services:
       - "traefik.http.routers.tbd-frontend.rule=Host(`161.35.238.238`)"
       - "traefik.http.services.tbd-frontend.loadbalancer.server.port=80"
       - "traefik.http.routers.tbd-frontend.entrypoints=web"
+      - "traefik.docker.network=dokploy-network"
     ports:
       - "${FRONTEND_PORT}:80"
     depends_on:
