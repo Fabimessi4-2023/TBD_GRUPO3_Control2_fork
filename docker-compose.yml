@@ -9,6 +9,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - tbd_postgres_prod_data:/var/lib/postgresql/data
+      - ./bd/creacion-bd.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - tbd-private-net
     healthcheck:
