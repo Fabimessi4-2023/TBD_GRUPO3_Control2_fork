@@ -74,4 +74,5 @@ networks:
 
 volumes:
   tbd_postgres_prod_data:
+    external: true
     name: tbd_postgres_prod_data # Nombre fijo para evitar solapamientos en CI/CD
